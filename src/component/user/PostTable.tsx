@@ -10,6 +10,7 @@ import Pagination from "../tanstackTable/Pagination";
 import { z } from "zod";
 import { formatThaiDate } from "../../utils";
 import PostRowAction from "./PostRowAction";
+import useAuth from "../../hook/useAuth";
 export const PostSchema = z.object({
   id: z.number().min(1),
   title: z.string().min(1),
@@ -56,9 +57,10 @@ const columns: ColumnDef<PostType>[] = [
 const PostTable = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get("page")) || 1;
-  const limit = Number(searchParams.get("limit")) || 2;
-
-  const { data, isLoading, isError } = usePosts(page, limit);
+  const limit = Number(searchParams.get("limit")) || 10;
+  const { user } = useAuth();
+  if (!user) return <p>Loading posts...</p>;
+  const { data, isLoading, isError } = usePosts(page, limit, user.id);
   const posts = data?.data || [];
   const totalPages = data?.meta?.totalPages || 1;
 
